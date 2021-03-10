@@ -1,5 +1,5 @@
 module Element.WithContext exposing
-    ( with, withAttribute, withDecoration, layout, layoutWith
+    ( with, withAttribute, withDecoration, layout, layoutWith, element, attribute, attr
     , Element, none, text, el
     , row, wrappedRow, column
     , paragraph, textColumn
@@ -22,7 +22,7 @@ module Element.WithContext exposing
     , Device, DeviceClass(..), Orientation(..), classifyDevice
     , modular
     , map, mapAttribute
-    , html, htmlAttribute, element
+    , html, htmlAttribute
     )
 
 {-|
@@ -30,7 +30,7 @@ module Element.WithContext exposing
 
 # `elm-ui-with-context` specific functions
 
-@docs with, withAttribute, withDecoration, layout, layoutWith
+@docs with, withAttribute, withDecoration, layout, layoutWith, element, attribute, attr
 
 
 # Basic Elements
@@ -214,7 +214,7 @@ You'll also need to retrieve the initial window size. You can either use [`Brows
 
 ## Compatibility
 
-@docs html, htmlAttribute, element
+@docs html, htmlAttribute
 
 -}
 
@@ -387,7 +387,7 @@ withAttribute selector f =
     Attribute <| \context -> runAttr context <| f <| selector context
 
 
-{-| Use a property from the context to build an `Attribute`. Have a look at the README for examples.
+{-| Use a property from the context to build a `Decoration`. Have a look at the README for examples.
 -}
 withDecoration : (context -> property) -> (property -> Decoration context) -> Decoration context
 withDecoration selector f =
