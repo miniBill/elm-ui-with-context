@@ -1,4 +1,4 @@
-module Element.WithContext.Internal exposing (Attr(..), Attribute, Color, Decoration, Element(..), attr, attribute, attributes, run, runAttribute, wrapAttrs, wrapContainer)
+module Element.WithContext.Internal exposing (Attr(..), Attribute, Color, Decoration, Element(..), attr, attribute, attributes, run, runAttr, wrapAttrs, wrapContainer)
 
 import Element
 
@@ -62,6 +62,6 @@ run context (Element f) =
     f context
 
 
-runAttribute : context -> Attribute context msg -> Element.Attribute msg
-runAttribute context (Attribute f) =
+runAttr : context -> Attr context decorative msg -> Element.Attr decorative msg
+runAttr context (Attribute f) =
     f context

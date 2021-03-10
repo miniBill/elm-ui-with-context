@@ -1,5 +1,5 @@
 module Element.WithContext exposing
-    ( with, withAttribute, layout, layoutWith
+    ( with, withAttribute, withDecoration, layout, layoutWith
     , Element, none, text, el
     , row, wrappedRow, column
     , paragraph, textColumn
@@ -30,7 +30,7 @@ module Element.WithContext exposing
 
 # `elm-ui-with-context` specific functions
 
-@docs with, withAttribute, layout, layoutWith
+@docs with, withAttribute, withDecoration, layout, layoutWith
 
 
 # Basic Elements
@@ -219,7 +219,7 @@ You'll also need to retrieve the initial window size. You can either use [`Brows
 -}
 
 import Element
-import Element.WithContext.Internal as Internal exposing (Attr(..), Attribute, Element(..), attr, attribute, attributes, run, runAttribute, wrapAttrs, wrapContainer)
+import Element.WithContext.Internal as Internal exposing (Attr(..), Attribute, Element(..), attr, attribute, attributes, run, runAttr, wrapAttrs, wrapContainer)
 import Html exposing (Html)
 
 
@@ -347,6 +347,20 @@ element elem =
     Element <| \_ -> elem
 
 
+{-| Embed an attribute from the original elm-ui library. This is useful for interop with existing code.
+-}
+attribute : Element.Attribute msg -> Attribute context msg
+attribute elem =
+    Attribute <| \_ -> elem
+
+
+{-| Embed an attribute from the original elm-ui library. This is useful for interop with existing code.
+-}
+attr : Element.Attr decorative msg -> Attr context decorative msg
+attr elem =
+    Attribute <| \_ -> elem
+
+
 {-| -}
 map : (msg -> msg1) -> Element context msg -> Element context msg1
 map f (Element g) =
@@ -370,7 +384,14 @@ with selector f =
 -}
 withAttribute : (context -> property) -> (property -> Attribute context msg) -> Attribute context msg
 withAttribute selector f =
-    Attribute <| \context -> runAttribute context <| f <| selector context
+    Attribute <| \context -> runAttr context <| f <| selector context
+
+
+{-| Use a property from the context to build an `Attribute`. Have a look at the README for examples.
+-}
+withDecoration : (context -> property) -> (property -> Decoration context) -> Decoration context
+withDecoration selector f =
+    Attribute <| \context -> runAttr context <| f <| selector context
 
 
 {-| -}
