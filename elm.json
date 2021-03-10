@@ -3,7 +3,7 @@
     "name": "miniBill/elm-ui-with-context",
     "summary": "An augmentation of elm-ui with a global context.",
     "license": "BSD-3-Clause",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "exposed-modules": [
         "Element.WithContext",
         "Element.WithContext.Input",
