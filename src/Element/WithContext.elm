@@ -23,6 +23,7 @@ module Element.WithContext exposing
     , modular
     , map, mapAttribute
     , html, htmlAttribute
+    , withContext, withContextAttribute, withContextDecoration
     )
 
 {-|
@@ -216,6 +217,13 @@ You'll also need to retrieve the initial window size. You can either use [`Brows
 
 @docs html, htmlAttribute
 
+
+## Advanced
+
+Sometimes it's more convenient to just access the whole context while building your view. This functions allow you do just that.
+
+@docs withContext, withContextAttribute, withContextDecoration
+
 -}
 
 import Element
@@ -392,6 +400,27 @@ withAttribute selector f =
 withDecoration : (context -> property) -> (property -> Decoration context) -> Decoration context
 withDecoration selector f =
     Attribute <| \context -> runAttr context <| f <| selector context
+
+
+{-| Use the context to build an `Element`. Have a look at the README for examples.
+-}
+withContext : (context -> Element context msg) -> Element context msg
+withContext f =
+    Element <| \context -> run context <| f context
+
+
+{-| Use the context to build an `Attribute`. Have a look at the README for examples.
+-}
+withContextAttribute : (context -> Attribute context msg) -> Attribute context msg
+withContextAttribute f =
+    Attribute <| \context -> runAttr context <| f context
+
+
+{-| Use the context to build a `Decoration`. Have a look at the README for examples.
+-}
+withContextDecoration : (context -> Decoration context) -> Decoration context
+withContextDecoration f =
+    Attribute <| \context -> runAttr context <| f context
 
 
 {-| -}
