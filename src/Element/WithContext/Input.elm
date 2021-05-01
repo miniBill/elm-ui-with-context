@@ -6,7 +6,7 @@ module Element.WithContext.Input exposing
     , Placeholder, placeholder
     , username, newPassword, currentPassword, email, search, spellChecked
     , slider, Thumb, thumb, defaultThumb
-    , radio, radioRow, Option, option, optionWith, OptionState
+    , radio, radioRow, Option, option, optionWith, OptionState(..)
     , Label, labelAbove, labelBelow, labelLeft, labelRight, labelHidden
     )
 
@@ -625,8 +625,10 @@ runOption context (Option f) =
 
 
 {-| -}
-type alias OptionState =
-    Input.OptionState
+type OptionState
+    = Idle
+    | Focused
+    | Selected
 
 
 {-| Add a choice to your radio element. This will be rendered with the default radio icon.
@@ -640,7 +642,22 @@ option val txt =
 -}
 optionWith : value -> (OptionState -> Element context msg) -> Option context value msg
 optionWith val view =
-    Option <| \context -> Input.optionWith val (run context << view)
+    let
+        optionStateConverter optionState =
+            case optionState of
+                Input.Idle ->
+                    Idle
+
+                Input.Focused ->
+                    Focused
+
+                Input.Selected ->
+                    Selected
+
+        viewConverted optionState =
+            view (optionStateConverter optionState)
+    in
+    Option <| \context -> Input.optionWith val (run context << viewConverted)
 
 
 {-| -}
