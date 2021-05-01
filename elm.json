@@ -20,10 +20,7 @@
         "elm/core": "1.0.0 <= v < 2.0.0",
         "elm/html": "1.0.0 <= v < 2.0.0",
         "elm/json": "1.0.0 <= v < 2.0.0",
-        "elm/virtual-dom": "1.0.0 <= v < 2.0.0",
         "mdgriffith/elm-ui": "1.1.0 <= v < 2.0.0"
     },
-    "test-dependencies": {
-        "elm-explorations/test": "1.2.2 <= v < 2.0.0"
-    }
+    "test-dependencies": {}
 }
