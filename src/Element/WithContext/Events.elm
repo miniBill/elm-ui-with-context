@@ -20,7 +20,6 @@ module Element.WithContext.Events exposing
 import Element.Events as Events
 import Element.WithContext exposing (Attribute)
 import Element.WithContext.Internal exposing (attribute)
-import Json.Decode as Json
 
 
 
