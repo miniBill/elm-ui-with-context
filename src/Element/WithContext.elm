@@ -24,6 +24,7 @@ module Element.WithContext exposing
     , map, mapAttribute
     , html, htmlAttribute
     , withContext, withContextAttribute, withContextDecoration
+    , run
     )
 
 {-|
@@ -227,7 +228,7 @@ Sometimes it's more convenient to just access the whole context while building y
 -}
 
 import Element
-import Element.WithContext.Internal as Internal exposing (Attr(..), Attribute, Element(..), attr, attribute, attributes, run, runAttr, wrapAttrs, wrapContainer)
+import Element.WithContext.Internal as Internal exposing (Attr(..), Attribute, Element(..), attr, attribute, attributes, runAttr, wrapAttrs, wrapContainer)
 import Html exposing (Html)
 
 
@@ -421,6 +422,14 @@ withContextAttribute f =
 withContextDecoration : (context -> Decoration context) -> Decoration context
 withContextDecoration f =
     Attribute <| \context -> runAttr context <| f context
+
+
+{-| Change a `Element context msg` into a `Element.Element msg`, which is
+needed when wrapping a third-party view that takes non-WithContext elements
+-}
+run : context -> Element context msg -> Element.Element msg
+run =
+    Internal.run
 
 
 {-| -}
