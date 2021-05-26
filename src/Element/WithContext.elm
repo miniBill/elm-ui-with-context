@@ -24,7 +24,7 @@ module Element.WithContext exposing
     , map, mapAttribute
     , html, htmlAttribute
     , withContext, withContextAttribute, withContextDecoration
-    , run, runAttr
+    , run, runAttr, withAttr
     )
 
 {-|
@@ -404,6 +404,13 @@ withAttribute selector f =
 -}
 withDecoration : (context -> property) -> (property -> Decoration context) -> Decoration context
 withDecoration selector f =
+    Attribute <| \context -> runAttr context <| f <| selector context
+
+
+{-| Use a property from the context to build an `Attr`. Have a look at the README for examples.
+-}
+withAttr : (context -> property) -> (property -> Attr context decoration msg) -> Attr context decoration msg
+withAttr selector f =
     Attribute <| \context -> runAttr context <| f <| selector context
 
 
