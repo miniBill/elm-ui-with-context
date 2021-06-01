@@ -24,7 +24,7 @@ module Element.WithContext exposing
     , map, mapAttribute
     , html, htmlAttribute
     , withContext, withContextAttribute, withContextDecoration
-    , run, runAttr, withAttr
+    , attributes, run, runAttr, withAttr
     )
 
 {-|
@@ -228,12 +228,16 @@ Sometimes it's more convenient to just access the whole context while building y
 -}
 
 import Element
-import Element.WithContext.Internal as Internal exposing (Attr(..), Attribute, Element(..), attr, attribute, attributes, wrapAttrs, wrapContainer)
+import Element.WithContext.Internal as Internal exposing (Attr(..), Attribute, Element(..), attr, attribute, wrapAttrs, wrapContainer)
 import Html exposing (Html)
 
 
 runAttr =
     Internal.runAttr
+
+
+attributes =
+    Internal.attributes
 
 
 {-| -}

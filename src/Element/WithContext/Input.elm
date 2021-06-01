@@ -3,7 +3,7 @@ module Element.WithContext.Input exposing
     , button
     , checkbox, defaultCheckbox
     , text, multiline
-    , Placeholder, placeholder, runPlaceholder
+    , Placeholder, placeholder, runPlaceholder, runLabel
     , username, newPassword, currentPassword, email, search, spellChecked
     , slider, Thumb, thumb, defaultThumb
     , radio, radioRow, Option, option, optionWith, OptionState(..)
@@ -66,7 +66,7 @@ This is also the first input element that has a [`required label`](#Label).
 
 @docs text, multiline
 
-@docs Placeholder, placeholder, runPlaceholder
+@docs Placeholder, placeholder, runPlaceholder, runLabel
 
 
 ## Text with autofill
