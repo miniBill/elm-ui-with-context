@@ -1,5 +1,5 @@
 module Element.WithContext exposing
-    ( with, withAttribute, withDecoration, layout, layoutWith, element, attribute, attr
+    ( with, withAttribute, withDecoration, layout, layoutWith, element, attribute, attr, embed, embedAttr
     , Element, none, text, el
     , row, wrappedRow, column
     , paragraph, textColumn
@@ -31,7 +31,7 @@ module Element.WithContext exposing
 
 # `elm-ui-with-context` specific functions
 
-@docs with, withAttribute, withDecoration, layout, layoutWith, element, attribute, attr
+@docs with, withAttribute, withDecoration, layout, layoutWith, element, attribute, attr, embed, embedAttr
 
 
 # Basic Elements
@@ -367,6 +367,50 @@ attribute elem =
 attr : Element.Attr decorative msg -> Attr context decorative msg
 attr elem =
     Attribute <| \_ -> elem
+
+
+{-| Allow integration with external libraries that require elm-ui `Element`s to be passed in.
+-}
+embed :
+    ({ unwrap : Element context msg -> Element.Element msg
+     , unwrapAttr : Attr context decorative msg -> Element.Attr decorative msg
+     }
+     -> Element context msg
+    )
+    -> Element context msg
+embed ctor =
+    Element <|
+        \context ->
+            let
+                (Element result) =
+                    ctor
+                        { unwrap = \(Element f) -> f context
+                        , unwrapAttr = \(Attribute f) -> f context
+                        }
+            in
+            result context
+
+
+{-| Allow integration with external libraries that require elm-ui `Element`s to be passed in.
+-}
+embedAttr :
+    ({ unwrap : Element context msg -> Element.Element msg
+     , unwrapAttr : Attr context decorative msg -> Element.Attr decorative msg
+     }
+     -> Attr context decorative msg
+    )
+    -> Attr context decorative msg
+embedAttr ctor =
+    Attribute <|
+        \context ->
+            let
+                (Attribute result) =
+                    ctor
+                        { unwrap = \(Element f) -> f context
+                        , unwrapAttr = \(Attribute f) -> f context
+                        }
+            in
+            result context
 
 
 {-| -}
