@@ -20,20 +20,21 @@ A good test for inclusion is to think of this: does it make sense to completely 
 ## How to use it
 1. Define a `Context` type (it will usually be a type alias);
 2. replace any `import Element` and any `import Element.X as X` with:
-    ```Elm
-    import Element.WithContext as Element
-    import Element.WithContext.X as X
+   ```elm
+   import Element.WithContext as Element
+   import Element.WithContext.X as X
+   ```
 3. don't expose `Element` or `Attribute` in the `import`, but instead define your type aliases:
-    ```Elm
-    type Element msg =
-        Element.Element Context msg
-    
-    type Attribute msg =
-        Element.Attribute Context msg
-    
-    type Attr decorative msg =
-        Element.Attr Context decorative msg
-
+   ```elm
+   type Element msg =
+       Element.Element Context msg
+   
+   type Attribute msg =
+       Element.Attribute Context msg
+   
+   type Attr decorative msg =
+       Element.Attr Context decorative msg
+   ```
 4. pass the context to `Element.layout`;
 5. everything should work as before, but now you can use `with` and `withAttribute` to access your context.
 
@@ -41,7 +42,7 @@ A good test for inclusion is to think of this: does it make sense to completely 
 ## Example: localization
 A nice way to do localization is to completely avoid exposing `text` from `Element.WithContext`, and instead defining your custom one like this:
 
-```Elm
+```elm
 type Language
     = En
     | It
@@ -87,7 +88,7 @@ Strings with placeholders can be represented as `L10N (a -> b -> String)` and us
 If you have a field `theme : Theme` in your context then you can replace any color constants in your code with `Theme -> Color` functions, and use them like this:
 
 
-```Elm
+```elm
 type Theme
     = Light
     | Dark
