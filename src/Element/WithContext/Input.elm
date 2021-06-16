@@ -187,12 +187,13 @@ Alternatively, see if it's reasonable to _not_ display an input if you'd normall
 import Element as Vanilla
 import Element.Input as Input
 import Element.WithContext exposing (Attribute, Element, element)
+import Element.WithContext.Input.Internal as InputInternal exposing (Label(..), Option(..), Placeholder(..), Thumb(..), runLabel, runOption, runPlaceholder, runThumb)
 import Element.WithContext.Internal exposing (attribute, attributes, run, wrapAttrs)
 
 
 {-| -}
-type Placeholder context msg
-    = Placeholder (context -> Input.Placeholder msg)
+type alias Placeholder context msg =
+    InputInternal.Placeholder context msg
 
 
 {-| -}
@@ -205,8 +206,8 @@ placeholder attrs child =
 
 
 {-| -}
-type Label context msg
-    = Label (context -> Input.Label msg)
+type alias Label context msg =
+    InputInternal.Label context msg
 
 
 buildLabel :
@@ -333,20 +334,14 @@ checkbox =
         )
 
 
-{-| -}
-type Thumb context
-    = Thumb (context -> Input.Thumb)
+type alias Thumb context =
+    InputInternal.Thumb context
 
 
 {-| -}
 thumb : List (Attribute context Never) -> Thumb context
 thumb attrs =
     Thumb <| \context -> Input.thumb <| attributes context attrs
-
-
-runThumb : a -> Thumb a -> Input.Thumb
-runThumb context (Thumb f) =
-    f context
 
 
 {-| -}
@@ -452,16 +447,6 @@ textHelper f =
             , placeholder = Maybe.map (runPlaceholder context) config.placeholder
             }
         )
-
-
-runPlaceholder : context -> Placeholder context msg -> Input.Placeholder msg
-runPlaceholder context (Placeholder f) =
-    f context
-
-
-runLabel : context -> Label context msg -> Input.Label msg
-runLabel context (Label f) =
-    f context
 
 
 {-| -}
@@ -615,13 +600,8 @@ multiline =
 
 
 {-| -}
-type Option context value msg
-    = Option (context -> Input.Option value msg)
-
-
-runOption : a -> Option a value msg -> Input.Option value msg
-runOption context (Option f) =
-    f context
+type alias Option context value msg =
+    InputInternal.Option context value msg
 
 
 {-| -}
