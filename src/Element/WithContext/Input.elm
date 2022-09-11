@@ -1,5 +1,7 @@
 module Element.WithContext.Input exposing
-    ( focusedOnLoad
+    ( withLabel, withOption, withPlaceholder, withThumb, mapContextInLabel, mapContextInOption, mapContextInPlaceholder, mapContextInThumb, toLabel, toOption, toPlaceholder, toThumb
+    , fromOption, fromPlaceholder, fromThumb, fromLabel
+    , focusedOnLoad
     , button
     , checkbox, defaultCheckbox
     , text, multiline
@@ -10,7 +12,19 @@ module Element.WithContext.Input exposing
     , Label, labelAbove, labelBelow, labelLeft, labelRight, labelHidden
     )
 
-{-| Input elements have a lot of constraints!
+{-|
+
+
+# `elm-ui-with-context` specific functions
+
+@docs withLabel, withOption, withPlaceholder, withThumb, mapContextInLabel, mapContextInOption, mapContextInPlaceholder, mapContextInThumb, toLabel, toOption, toPlaceholder, toThumb
+
+`elm-ui` to `elm-ui-with-context` conversions are named "fromX" instead of "x"
+to avoid name clashes with existing functions.
+
+@docs fromOption, fromPlaceholder, fromThumb, fromLabel
+
+Input elements have a lot of constraints!
 
 We want all of our input elements to:
 
@@ -27,7 +41,7 @@ This module is intended to be accessible by default. You shouldn't have to wade 
 
 # Focus Styling
 
-All Elements can be styled on focus by using [`Element.focusStyle`](Element#focusStyle) to set a global focus style or [`Element.focused`](Element#focused) to set a focus style individually for an element.
+All Elements can be styled on focus by using [`Element.focusStyle`](Element-WithContext#focusStyle) to set a global focus style or [`Element.focused`](Element-WithContext#focused) to set a focus style individually for an element.
 
 @docs focusedOnLoad
 
@@ -110,7 +124,7 @@ Nevertheless, here we are. Here's how you put one together
             ]
         }
 
-**Note** we're using `Input.option`, which will render the default radio icon you're probably used to. If you want compeltely custom styling, use `Input.optionWith`!
+**Note** we're using `Input.option`, which will render the default radio icon you're probably used to. If you want completely custom styling, use `Input.optionWith`!
 
 @docs radio, radioRow, Option, option, optionWith, OptionState
 
@@ -195,6 +209,36 @@ type Placeholder context msg
     = Placeholder (context -> Input.Placeholder msg)
 
 
+{-| Embed a label from the original elm-ui library. This is useful for interop with existing code.
+-}
+fromPlaceholder : Input.Placeholder msg -> Placeholder context msg
+fromPlaceholder elmUiPlaceHolder =
+    Placeholder <| \_ -> elmUiPlaceHolder
+
+
+{-| Construct a placeholder from the original elm-ui by supplying a complete context.
+[`toElement`](Element-WithContext#toElement) documents use-cases.
+-}
+toPlaceholder : context -> Placeholder context msg -> Input.Placeholder msg
+toPlaceholder context (Placeholder f) =
+    f context
+
+
+{-| Use a property from the context to build a `Placeholder`. Have a look at the README for examples.
+-}
+withPlaceholder : (context -> property) -> (property -> Placeholder context msg) -> Placeholder context msg
+withPlaceholder selector f =
+    Placeholder <| \context -> toPlaceholder context <| f <| selector context
+
+
+{-| Change how the context looks for a given placeholder.
+[`mapContextInElement`](Element-WithContext#mapContextInElement) documents use-cases.
+-}
+mapContextInPlaceholder : (contextOuter -> contextInner) -> Placeholder contextInner msg -> Placeholder contextOuter msg
+mapContextInPlaceholder outerToInnerContext (Placeholder f) =
+    Placeholder (outerToInnerContext >> f)
+
+
 {-| -}
 placeholder : List (Attribute context msg) -> Element context msg -> Placeholder context msg
 placeholder attrs child =
@@ -207,6 +251,36 @@ placeholder attrs child =
 {-| -}
 type Label context msg
     = Label (context -> Input.Label msg)
+
+
+{-| Embed a label from the original elm-ui library. This is useful for interop with existing code.
+-}
+fromLabel : Input.Label msg -> Label context msg
+fromLabel elmUiLabel =
+    Label <| \_ -> elmUiLabel
+
+
+{-| Construct a label from the original elm-ui by supplying a complete context.
+[`toElement`](Element-WithContext#toElement) documents use-cases.
+-}
+toLabel : context -> Label context msg -> Input.Label msg
+toLabel context (Label f) =
+    f context
+
+
+{-| Use a property from the context to build a `Label`. Have a look at the README for examples.
+-}
+withLabel : (context -> property) -> (property -> Label context msg) -> Label context msg
+withLabel selector f =
+    Label <| \context -> toLabel context <| f <| selector context
+
+
+{-| Change how the context looks for a given label.
+[`mapContextInElement`](Element-WithContext#mapContextInElement) documents use-cases.
+-}
+mapContextInLabel : (contextOuter -> contextInner) -> Label contextInner msg -> Label contextOuter msg
+mapContextInLabel outerToInnerContext (Label f) =
+    Label (outerToInnerContext >> f)
 
 
 buildLabel :
@@ -286,7 +360,7 @@ The `onPress` handler will be fired either `onClick` or when the element is focu
             , label = text "My Button"
             }
 
-**Note** If you have an icon button but want it to be accessible, consider adding a [`Region.description`](Element-Region#description), which will describe the button to screen readers.
+**Note** If you have an icon button but want it to be accessible, consider adding a [`Region.description`](Element-WithContext-Region#description), which will describe the button to screen readers.
 
 -}
 button :
@@ -325,7 +399,7 @@ checkbox :
 checkbox =
     wrapAttrs Input.checkbox
         (\context { label, icon, checked, onChange } ->
-            { label = runLabel context label
+            { label = toLabel context label
             , icon = icon >> run context
             , checked = checked
             , onChange = onChange
@@ -338,15 +412,40 @@ type Thumb context
     = Thumb (context -> Input.Thumb)
 
 
+{-| Embed a thumb from the original elm-ui library. This is useful for interop with existing code.
+-}
+fromThumb : Input.Thumb -> Thumb context
+fromThumb elmUiThumb =
+    Thumb <| \_ -> elmUiThumb
+
+
+{-| Construct a thumb from the original elm-ui by supplying a complete context.
+[`toElement`](Element-WithContext#toElement) documents use-cases.
+-}
+toThumb : context -> Thumb context -> Input.Thumb
+toThumb context (Thumb f) =
+    f context
+
+
+{-| Use a property from the context to build a `Thumb`. Have a look at the README for examples.
+-}
+withThumb : (context -> property) -> (property -> Thumb context) -> Thumb context
+withThumb selector f =
+    Thumb <| \context -> toThumb context <| f <| selector context
+
+
+{-| Change how the context looks for a given thumb.
+[`mapContextInElement`](Element-WithContext#mapContextInElement) documents use-cases.
+-}
+mapContextInThumb : (contextOuter -> contextInner) -> Thumb contextInner -> Thumb contextOuter
+mapContextInThumb outerToInnerContext (Thumb f) =
+    Thumb (outerToInnerContext >> f)
+
+
 {-| -}
 thumb : List (Attribute context Never) -> Thumb context
 thumb attrs =
     Thumb <| \context -> Input.thumb <| attributes context attrs
-
-
-runThumb : a -> Thumb a -> Input.Thumb
-runThumb context (Thumb f) =
-    f context
 
 
 {-| -}
@@ -415,11 +514,11 @@ slider =
     wrapAttrs Input.slider
         (\context config ->
             { onChange = config.onChange
-            , label = runLabel context config.label
+            , label = toLabel context config.label
             , min = config.min
             , max = config.max
             , value = config.value
-            , thumb = runThumb context config.thumb
+            , thumb = toThumb context config.thumb
             , step = config.step
             }
         )
@@ -448,20 +547,10 @@ textHelper f =
         (\context config ->
             { onChange = config.onChange
             , text = config.text
-            , label = runLabel context config.label
-            , placeholder = Maybe.map (runPlaceholder context) config.placeholder
+            , label = toLabel context config.label
+            , placeholder = Maybe.map (toPlaceholder context) config.placeholder
             }
         )
-
-
-runPlaceholder : context -> Placeholder context msg -> Input.Placeholder msg
-runPlaceholder context (Placeholder f) =
-    f context
-
-
-runLabel : context -> Label context msg -> Input.Label msg
-runLabel context (Label f) =
-    f context
 
 
 {-| -}
@@ -529,8 +618,8 @@ newPassword =
         (\context config ->
             { onChange = config.onChange
             , text = config.text
-            , label = runLabel context config.label
-            , placeholder = Maybe.map (runPlaceholder context) config.placeholder
+            , label = toLabel context config.label
+            , placeholder = Maybe.map (toPlaceholder context) config.placeholder
             , show = config.show
             }
         )
@@ -552,8 +641,8 @@ currentPassword =
         (\context config ->
             { onChange = config.onChange
             , text = config.text
-            , label = runLabel context config.label
-            , placeholder = Maybe.map (runPlaceholder context) config.placeholder
+            , label = toLabel context config.label
+            , placeholder = Maybe.map (toPlaceholder context) config.placeholder
             , show = config.show
             }
         )
@@ -607,8 +696,8 @@ multiline =
         (\context config ->
             { onChange = config.onChange
             , text = config.text
-            , label = runLabel context config.label
-            , placeholder = Maybe.map (runPlaceholder context) config.placeholder
+            , label = toLabel context config.label
+            , placeholder = Maybe.map (toPlaceholder context) config.placeholder
             , spellcheck = config.spellcheck
             }
         )
@@ -619,9 +708,34 @@ type Option context value msg
     = Option (context -> Input.Option value msg)
 
 
-runOption : a -> Option a value msg -> Input.Option value msg
-runOption context (Option f) =
+{-| Embed an option from the original elm-ui library. This is useful for interop with existing code.
+-}
+fromOption : Input.Option value msg -> Option context value msg
+fromOption elmUiOption =
+    Option <| \_ -> elmUiOption
+
+
+{-| Construct an option from the original elm-ui by supplying a complete context.
+[`toElement`](Element-WithContext#toElement) documents use-cases.
+-}
+toOption : context -> Option context value msg -> Input.Option value msg
+toOption context (Option f) =
     f context
+
+
+{-| Use a property from the context to build an `Option`. Have a look at the README for examples.
+-}
+withOption : (context -> property) -> (property -> Option context value msg) -> Option context value msg
+withOption selector f =
+    Option <| \context -> toOption context <| f <| selector context
+
+
+{-| Change how the context looks for a given option.
+[`mapContextInElement`](Element-WithContext#mapContextInElement) documents use-cases.
+-}
+mapContextInOption : (contextOuter -> contextInner) -> Option contextInner value msg -> Option contextOuter value msg
+mapContextInOption outerToInnerContext (Option f) =
+    Option (outerToInnerContext >> f)
 
 
 {-| -}
@@ -705,9 +819,9 @@ radioHelper :
         }
 radioHelper context config =
     { onChange = config.onChange
-    , options = List.map (runOption context) config.options
+    , options = List.map (toOption context) config.options
     , selected = config.selected
-    , label = runLabel context config.label
+    , label = toLabel context config.label
     }
 
 
