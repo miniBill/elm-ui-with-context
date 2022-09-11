@@ -356,6 +356,56 @@ htmlAttribute child =
 `element` can also be used in combination with `with`
 to supply arguments to an elm-ui element from the context.
 
+For example
+
+    module SomePackage exposing (Context, view)
+
+    import Element exposing (Element)
+
+    view :
+        { backgroundColor : Element.Color
+        , foregroundColor : Element.Color
+        }
+        -> Element msg
+
+in your code
+
+    module YourCode exposing (main)
+
+    import Element.WithContext exposing (Element)
+
+    type alias Context =
+        { theme : Theme }
+
+    type Theme
+        = Black
+        | White
+
+    themeToColors :
+        Theme
+        -> { background : Element.WithContext.Color
+           , foreground : Element.WithContext.Color
+           }
+
+    view : Element Context msg
+    view =
+        Element.WithContext.column
+            []
+            [ ...
+            , Element.WithContext.with
+                (\{ theme } ->
+                    let
+                        themeColors =
+                            theme |> themeToColors
+                    in
+                    SomePackage.view
+                        { backgroundColor = themeColors.background
+                        , foregroundColor = themeColors.foreground
+                        }
+                        |> Element.WithContext.element
+                )
+            ]
+
 -}
 element : Element.Element msg -> Element context msg
 element elem =
