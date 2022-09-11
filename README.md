@@ -79,7 +79,7 @@ This has the advantage of keeping a nice API while making it (almost) impossible
 
 Notice how `text` simply requires a context that includes a `language` field, so is very generic.
 
-This tecnique can be adapted for image sources, title texts, and anything that needs localization.
+This technique can be adapted for image sources, title texts, and anything that needs localization.
 
 Strings with placeholders can be represented as `L10N (a -> b -> String)` and used by defining an `apply : L10N (a -> b) -> a -> L10N b`. Beware: different languages can have very different rules on plurals, genders, special cases, ...
 
