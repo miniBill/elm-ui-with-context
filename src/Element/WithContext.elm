@@ -1,5 +1,5 @@
 module Element.WithContext exposing
-    ( with, withAttribute, withDecoration, layout, layoutWith, element, attribute, attr
+    ( with, withAttribute, withDecoration, layout, layoutWith, element, attribute, attr, toElement, toAttribute, toAttr, mapContextInElement, mapContextInAttr
     , Element, none, text, el
     , row, wrappedRow, column
     , paragraph, textColumn
@@ -31,7 +31,10 @@ module Element.WithContext exposing
 
 # `elm-ui-with-context` specific functions
 
-@docs with, withAttribute, withDecoration, layout, layoutWith, element, attribute, attr
+@docs with, withAttribute, withDecoration, layout, layoutWith, element, attribute, attr, toElement, toAttribute, toAttr, mapContextInElement, mapContextInAttr
+
+Apart from some other functions in [`Element.WithContext.Input`](Element-WithContext-Input),
+this is everything `elm-ui-with-context` adds to `elm-ui`.
 
 
 # Basic Elements
@@ -208,17 +211,17 @@ You'll also need to retrieve the initial window size. You can either use [`Brows
 @docs modular
 
 
-## Mapping
+# Mapping
 
 @docs map, mapAttribute
 
 
-## Compatibility
+# Compatibility
 
 @docs html, htmlAttribute
 
 
-## Advanced
+# Advanced
 
 Sometimes it's more convenient to just access the whole context while building your view. This functions allow you do just that.
 
@@ -227,7 +230,7 @@ Sometimes it's more convenient to just access the whole context while building y
 -}
 
 import Element
-import Element.WithContext.Internal as Internal exposing (Attr(..), Attribute, Element(..), attr, attribute, attributes, run, runAttr, wrapAttrs, wrapContainer)
+import Element.WithContext.Internal as Internal exposing (Attr(..), Attribute, Element(..), attributes, run, runAttr, wrapAttrs, wrapContainer)
 import Html exposing (Html)
 
 
@@ -349,6 +352,10 @@ htmlAttribute child =
 
 
 {-| Embed an element from the original elm-ui library. This is useful for interop with existing code, like `lemol/ant-design-icons-elm-ui`.
+
+`element` can also be used in combination with `with`
+to supply arguments to an elm-ui element from the context.
+
 -}
 element : Element.Element msg -> Element context msg
 element elem =
@@ -367,6 +374,144 @@ attribute elem =
 attr : Element.Attr decorative msg -> Attr context decorative msg
 attr elem =
     Attribute <| \_ -> elem
+
+
+{-| Construct an element from the original elm-ui supplying a complete context.
+
+This can be used as the final step before
+embedding sub-elements that use elm-ui-with-context
+in a bigger elm-ui element
+without elm-ui-with-context becoming "infectious"
+and forcing higher-level elements to adopt context.
+
+For example
+
+    module SomePackage exposing (Context, view)
+
+    import Element.WithContext exposing (Element)
+
+    type alias Context =
+        { backgroundColor : Element.WithContext.Color
+        , foregroundColor : Element.WithContext.Color
+        }
+
+    view : Element Context msg
+
+in your code
+
+    module YourCode exposing (main)
+
+    import Element exposing (Element)
+    import Element.WithContext
+
+    view : Element msg
+    view =
+        Element.WithContext.column
+            []
+            [ ...
+            , SomePackage.view
+                -- app currently only supports a black theme
+                -- but `SomePackage`'s theme must be configured ↓
+                |> Element.WithContext.toElement
+                    { backgroundColor = Element.WithContext.rgb 0 0 0
+                    , foregroundColor = Element.WithContext.rgb 1 1 1
+                    }
+            ]
+
+-}
+toElement : context -> Element context msg -> Element.Element msg
+toElement context (Element f) =
+    f context
+
+
+{-| Construct an attribute for the original elm-ui supplying a complete context.
+[`toElement`](#toElement) documents use-cases.
+-}
+toAttribute : context -> Attribute context msg -> Element.Attribute msg
+toAttribute context (Attribute f) =
+    f context
+
+
+{-| Construct an attribute from the original elm-ui by supplying a complete context.
+[`toElement`](#toElement) documents use-cases.
+-}
+toAttr : context -> Attr context decorative msg -> Element.Attr decorative msg
+toAttr context (Attribute f) =
+    f context
+
+
+{-| Change how the context looks for a given element.
+
+This is used to embed elm-ui-with-context
+from another origin (like a package)
+with another context type.
+
+This is quite similar to [`map`](#map)
+but instead of transforming the msg type to match the outer type,
+it transforms the context type to match the outer type.
+
+For example
+
+    module SomePackage exposing (Context, view)
+
+    import Element.WithContext exposing (Element)
+
+    type alias Context =
+        { backgroundColor : Element.WithContext.Color
+        , foregroundColor : Element.WithContext.Color
+        }
+
+    view : Element Context msg
+
+in your code
+
+    module YourCode exposing (main)
+
+    import Element.WithContext exposing (Element)
+
+    type alias Context =
+        { theme : Theme }
+
+    type Theme
+        = Black
+        | White
+
+    themeToColors :
+        Theme
+        -> { background : Element.WithContext.Color
+           , foreground : Element.WithContext.Color
+           }
+
+    view : Element Context msg
+    view =
+        Element.WithContext.column
+            []
+            [ ...
+            , Element.WithContext.mapContextInElement
+                (\{ theme } ->
+                    let
+                        themeColors =
+                            theme |> themeToColors
+                    in
+                    { backgroundColor = themeColors.background
+                    , foregroundColor = themeColors.foreground
+                    }
+                )
+                SomePackage.view
+            ]
+
+-}
+mapContextInElement : (outerContext -> innerContext) -> Element innerContext msg -> Element outerContext msg
+mapContextInElement outerToInnerContext (Element f) =
+    Element (outerToInnerContext >> f)
+
+
+{-| Change how the context looks for a given attribute.
+[`mapContextInElement`](#mapContextInElement) documents use-cases.
+-}
+mapContextInAttr : (outerContext -> innerContext) -> Attr innerContext decorative msg -> Attr outerContext decorative msg
+mapContextInAttr outerToInnerContext (Attribute f) =
+    Attribute (outerToInnerContext >> f)
 
 
 {-| -}
@@ -497,14 +642,14 @@ fillPortion =
 {-| This is your top level node where you can turn `Element` into `Html`.
 -}
 layout : context -> List (Attribute context msg) -> Element context msg -> Html msg
-layout context attrs (Element f) =
-    Element.layout (attributes context attrs) (f context)
+layout context attrs elem =
+    Element.layout (attributes context attrs) (elem |> toElement context)
 
 
 {-| -}
 layoutWith : context -> { options : List Option } -> List (Attribute context msg) -> Element context msg -> Html msg
-layoutWith context options attrs (Element f) =
-    Element.layoutWith options (attributes context attrs) (f context)
+layoutWith context options attrs elem =
+    Element.layoutWith options (attributes context attrs) (elem |> toElement context)
 
 
 {-| -}
@@ -917,8 +1062,8 @@ downloadAs =
 
 
 createNearby : (Element.Element msg -> Element.Attribute msg) -> Element context msg -> Attribute context msg
-createNearby toAttr (Element f) =
-    Attribute (f >> toAttr)
+createNearby elementToAttr (Element f) =
+    Attribute (f >> elementToAttr)
 
 
 {-| -}
