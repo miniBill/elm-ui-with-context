@@ -107,13 +107,13 @@ fontColor theme =
 someViewFunction =
     el
         [ Element.withAttribute
-            (\{theme} -> fontColor theme)
+            (\{ theme } -> fontColor theme)
             Font.color
         ]
         (text "Hello")
 ```
 
-(`\{theme} -> fontColor theme` can be replaced by `.theme >> fontColor`, depending on taste).
+(`\{ theme } -> fontColor theme` can be replaced by `.theme >> fontColor`, depending on taste.)
 
 This also has the advantage that you can "force" a particular theme in places that need it, like the theme picker, by just doing `fontColor Light`.
 
