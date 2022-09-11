@@ -497,8 +497,8 @@ from another origin (like a package)
 with another context type.
 
 This is quite similar to [`map`](#map)
-but instead of transforming the msg type to match the outer type,
-it transforms the context type to match the outer type.
+but instead of transforming the inner msg type to match the outer type,
+it transforms the outer context type to match the inner type.
 
 For example
 
